@@ -1,0 +1,1 @@
+{"version":3,"names":["NativeEventEmitter","TelnyxNativeSdk","emitter"],"sourceRoot":"../../src","sources":["events.ts"],"mappings":"AAAA,SAASA,kBAAkB,QAAQ,cAAc;AAEjD,SAASC,eAAe,QAAQ,mBAAmB;AAEnD,OAAO,MAAMC,OAAO,GAAG,IAAIF,kBAAkB,CAACC,eAAe,CAAC"}

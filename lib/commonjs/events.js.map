@@ -1,0 +1,1 @@
+{"version":3,"names":["_reactNative","require","_TelnyxNativeSdk","emitter","NativeEventEmitter","TelnyxNativeSdk","exports"],"sourceRoot":"../../src","sources":["events.ts"],"mappings":";;;;;;AAAA,IAAAA,YAAA,GAAAC,OAAA;AAEA,IAAAC,gBAAA,GAAAD,OAAA;AAEO,MAAME,OAAO,GAAG,IAAIC,+BAAkB,CAACC,gCAAe,CAAC;AAACC,OAAA,CAAAH,OAAA,GAAAA,OAAA"}
