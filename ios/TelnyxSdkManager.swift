@@ -1,0 +1,73 @@
+//
+//  TelnyxSdkManager.swift
+//  react-native-telnyx-sdk
+//
+//  Created by Ainur on 17.05.2023.
+//
+
+import Foundation
+import TelnyxRTC
+import React
+
+
+@objc(TelnyxSdkManager)
+final class TelnyxSdkManager: RCTEventEmitter {
+    private let shared = TelnyxSdk.shared
+
+    private lazy var eventsHandler: EventsHandler = {
+        let eventsHandler = EventsHandler(eventEmitter: self)
+        TelnyxSdk.shared.delegate = eventsHandler
+
+        return eventsHandler
+    }()
+
+    override func supportedEvents() -> [String] {
+        return eventsHandler.supportedEvents
+    }
+
+    @objc(login:password:token:certificateId:)
+    func login(
+        withUserName userName: String,
+        andPassword password: String,
+        deviceToken token: String,
+        certificateId: String
+        )
+        -> Void {
+            TelnyxSdk.shared.login(username: userName,
+                                   password: password,
+                                   deviceToken: token)
+    }
+
+    @objc func logout() {
+        shared.logout()
+    }
+
+    @objc static func processVoIPNotification(callUUID: UUID) {
+        TelnyxSdk.shared.processVoIPNotification(callUUID: callUUID)
+    }
+
+    @objc(call:headers:)
+    func call(withDest dest: String, andHeaders headers: [AnyHashable: Any]) {
+        return shared.call(dest: dest, headers: headers)
+    }
+
+    @objc func mute() {
+        shared.mute()
+    }
+
+    @objc func unmute() {
+        shared.unmute()
+    }
+
+    @objc func answer() {
+        shared.answer()
+    }
+
+    @objc func hangup() {
+        shared.hangup()
+    }
+
+    @objc func reject() {
+        shared.reject()
+    }
+}

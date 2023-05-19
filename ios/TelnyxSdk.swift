@@ -1,128 +1,94 @@
 import TelnyxRTC
 import React
-import Foundation
+import CallKit
 
-@objc(TelnyxSdk)
-class TelnyxSdk: RCTEventEmitter, TxClientDelegate {
 
-  private var telnyxClient: TxClient
+final class TelnyxSdk: NSObject {
+    static let shared = TelnyxSdk()
 
-  override init() {
-    super.init()
-    telnyxClient = TxClient()
+    weak var delegate: TelnyxEventHandling?
 
-    telnyxClient.delegate = self
-  }
+    private let telnyxClient: TxClient = TxClient()
+    private let callKitService = CallKitService()
+    private let credentialsManager = CredentialsManager()
 
-  override static func requiresMainQueueSetup() -> Bool {
-        return true
+    private var outgoingCall: Call?
+    private var incomingCall: Call?
+
+    override init() {
+        super.init()
+
+        telnyxClient.delegate = self
     }
 
-    override func supportedEvents() -> [String]! {
-        return [
-            "Telnyx-onLogin",
-            "Telnyx-onLoginFailed",
-            "Telnyx-onLogout",
-            "Telnyx-onIncomingCall",
-            "Telnyx-onIncomingCallHangup",
-            "Telnyx-onIncomingCallRejected",
-            "Telnyx-onIncomingCallAnswered",
-            "Telnyx-onIncomingCallInvalid",
-            "Telnyx-onOutgoingCall",
-            "Telnyx-onOutgoingCallAnswered",
-            "Telnyx-onOutgoingCallRinging",
-            "Telnyx-onOutgoingCallRejected",
-            "Telnyx-onOutgoingCallHangup",
-            "Telnyx-onOutgoingCallInvalid"
-        ]
+    func login(username: String, password: String, deviceToken: String) -> Void {
+        let txConfig = TxConfig(sipUser: username, password: password, pushDeviceToken: deviceToken)
+
+        do {
+            try telnyxClient.connect(txConfig: txConfig)
+            credentialsManager.saveCredentials(username, password, deviceToken)
+        } catch let error {
+            print("Telnyx connect error: \(error)")
+        }
     }
 
-    override func startObserving() {
-        print("TelnyxSdk ReactNativeEventEmitter startObserving")
-
-        hasListeners = true
-
-        super.startObserving()
-    }
-
-
-    override func stopObserving() {
-        print("TelnyxSdk ReactNativeEventEmitter stopObserving")
-
-        hasListeners = false
-
-        super.stopObserving()
-    }
-
-      @objc(login:password:token:certificateId:)
-    func login(
-        withUserName userName: String,
-        andPassword password: String,
-        deviceToken token: String
-        )
-        -> Void {
-            let txConfigUserAndPassowrd = TxConfig(sipUser: userName,
-                                       password: password,
-                                       pushDeviceToken: token)
-
-                                       do {
-          // Connect and login
-          // Use `txConfigUserAndPassowrd` or `txConfigToken`
-              try telnyxClient.connect(txConfig: txConfigToken)
-            } catch let error {
-              print("ViewController:: connect Error \(error)")
-            }
-    }
-
-    @objc(logout)
     func logout() {
-        telnyxClient.disconnect();
-
+        telnyxClient.disconnect()
+        credentialsManager.deleteCredentials()
     }
 
-    @objc(call:headers:)
-    func call(withDest dest: String, andHeaders headers: [AnyHashable: Any]) -> PlivoOutgoing {
-        telnyxClient?.newCall(callerName: "Caller name",
-                                                     callerNumber: "155531234567",
-                                                     // Destination is required and can be a phone number or SIP URI
-                                                     destinationNumber: "18004377950",
-                                                     callId: UUID.init())
+    func processVoIPNotification(callUUID: UUID) {
+        guard let username = credentialsManager.username,
+              let password = credentialsManager.password else {
+            return
+        }
+
+        let txConfig = TxConfig(sipUser: username,
+                                password: password)
+
+        do {
+            try telnyxClient.processVoIPNotification(txConfig: txConfig)
+        } catch let error {
+            print("ViewController:: processVoIPNotification Error \(error)")
+        }
     }
 
-    @objc(configureAudioSession)
-    func configureAudioSession() {
-        endpoint.configureAudioDevice()
-    }
+    func call(dest: String, headers: [AnyHashable: Any]) {
+        let callerNumber = String(describing: headers["X-PH-callerId"]!).replacingOccurrences(of: "+", with: "")
+        let destinationNumber = dest.replacingOccurrences(of: "+", with: "")
 
-    @objc(startAudioDevice)
-    func startAudioDevice() {
-        endpoint.startAudioDevice()
-    }
-
-    @objc(stopAudioDevice)
-    func stopAudioDevice() {
-        endpoint.stopAudioDevice()
+        let uuid = UUID.init()
+        do {
+            outgoingCall = try telnyxClient.newCall(callerName: "",
+                                                    callerNumber: callerNumber,
+                                                    destinationNumber: destinationNumber,
+                                                    callId: uuid)
+            telnyxClient.isAudioDeviceEnabled = true
+            callKitService.startAudioDevice(handle: "", phone: destinationNumber, callUUID: uuid)
+        } catch let err {
+            print(err)
+        }
     }
 
     @objc(mute)
     func mute() {
         if (outgoingCall != nil) {
-            outgoingCall?.mute()
+            outgoingCall?.muteAudio()
         }
 
         if (incomingCall != nil) {
-            incomingCall?.mute()
+            incomingCall?.muteAudio()
         }
     }
 
     @objc(unmute)
     func unmute() {
         if (outgoingCall != nil) {
-            outgoingCall?.unmute()
+            outgoingCall?.unmuteAudio()
         }
 
         if (incomingCall != nil) {
-            incomingCall?.unmute()
+            incomingCall?.unmuteAudio()
         }
     }
 
@@ -149,65 +115,102 @@ class TelnyxSdk: RCTEventEmitter, TxClientDelegate {
     @objc(reject)
     func reject() {
         if (incomingCall != nil) {
-            incomingCall?.reject()
+            incomingCall?.hangup()
             incomingCall = nil
         }
     }
+}
 
-    func onRemoteCallEnded(callId: UUID) {
-        // Call has been removed internally.
-    }
+extension TelnyxSdk: TxClientDelegate {
+    /// When the client has successfully connected to the Telnyx Backend.
+    func onSocketConnected() {}
 
-    func onSocketConnected() {
-       // When the client has successfully connected to the Telnyx Backend.
-    }
+    /// This function will be executed when a sessionId is received.
+    func onSessionUpdated(sessionId: String)  {}
 
-    func onSocketDisconnected() {
-       // When the client from the Telnyx backend
-    }
+    /// When the client from the Telnyx backend.
+    func onSocketDisconnected() {}
 
-    func onClientError(error: Error)  {
-        // Something went wrong.
-    }
-
+    /// You can start receiving incoming calls or start making calls once the client was fully initialized.
     func onClientReady()  {
-       // You can start receiving incoming calls or
-       // start making calls once the client was fully initialized.
+        delegate?.onLogin()
     }
 
-    func onSessionUpdated(sessionId: String)  {
-       // This function will be executed when a sessionId is received.
+    /// Something went wrong.
+    func onClientError(error: Error)  {
+        delegate?.onLoginFailedWithError(error)
     }
 
+    /// This delegate method will be called when the app is in foreground and the Telnyx Client is connected.
     func onIncomingCall(call: Call)  {
-       // Someone is calling you.
-       // This delegate method will be called when the app is in foreground and the Telnyx Client is connected.
+        incomingCall = call
+        delegate?.onIncomingCall(convertCallInfoToDict(call))
     }
 
+    /// If you have configured Push Notifications and app is in background or the Telnyx Client is disconnected this delegate method will be called after the push notification is received.
     func onPushCall(call: Call) {
-       // If you have configured Push Notifications and app is in background or the Telnyx Client is disconnected
-       // this delegate method will be called after the push notification is received.
-       // Update the current call with the incoming call
-       self.currentCall = call
+       incomingCall = call
+        delegate?.onIncomingCall(convertCallInfoToDict(call))
     }
 
-        // You can update your UI from here based on the call states.
-    // Check that the callId is the same as your current call.
+    /// Call has been removed internally.
+    func onRemoteCallEnded(callId: UUID) {
+        if outgoingCall != nil {
+            delegate?.onOutgoingCallHangup(["callId": callId.uuidString])
+        }
+
+        if incomingCall != nil {
+            delegate?.onIncomingCallHangup(["callId": callId.uuidString])
+        }
+
+        callKitService.stopAudioDevice(callUUID: callId)
+    }
+
+    /// You can update your UI from here based on the call states.
+    /// Check that the callId is the same as your current call.
     func onCallStateUpdated(callState: CallState, callId: UUID) {
-      // handle the new call state
       switch (callState) {
       case .CONNECTING:
+          print("(telnyx): connecting")
+          delegate?.onCalling(["callId": callId.uuidString])
           break
+
       case .RINGING:
+          print("(telnyx): ringing")
+          delegate?.onOutgoingCallRinging(["callId": callId.uuidString])
           break
+
       case .NEW:
+          print("(telnyx): new")
           break
+
       case .ACTIVE:
+          print("(telnyx): active")
           break
+
       case .DONE:
+          print("(telnyx): done")
+          if outgoingCall != nil {
+              delegate?.onOutgoingCallHangup(["callId": callId.uuidString])
+          }
+          if incomingCall != nil {
+              delegate?.onIncomingCallHangup(["callId": callId.uuidString])
+          }
+          callKitService.stopAudioDevice(callUUID: callId)
           break
+
       case .HELD:
+          print("(telnyx): held")
           break
       }
+    }
+
+    private func convertCallInfoToDict(_ call: Call) -> [String: Any] {
+        let body: [String: Any] = [
+            "callId": call.callInfo?.callId ?? "",
+            "from": call.callInfo?.callerName ?? ""
+        ]
+
+        return body
     }
 }
