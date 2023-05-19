@@ -6,8 +6,8 @@ const LINKING_ERROR =
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo Go\n';
 
-export const TelnyxNativeSdk = NativeModules.TelnyxSdk
-  ? NativeModules.TelnyxSdk
+export const TelnyxNativeSdk = NativeModules.TelnyxSdkManager
+  ? NativeModules.TelnyxSdkManager
   : new Proxy(
       {},
       {

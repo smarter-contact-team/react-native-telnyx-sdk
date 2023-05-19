@@ -1,7 +1,7 @@
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
 
-@interface RCT_EXTERN_MODULE(TelnyxSdk, NSObject)
+@interface RCT_EXTERN_MODULE(TelnyxSdkManager, NSObject)
 
 RCT_EXTERN_METHOD(login:(nonnull NSString *)userName
                   password:(nonnull NSString *)password

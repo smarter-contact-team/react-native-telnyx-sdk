@@ -7,8 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5E555C0D2413F4C50049A1A2 /* TelnyxSdk.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* TelnyxSdk.m */; };
-		F4FF95D7245B92E800C19C63 /*  TelnyxSdk.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF95D6245B92E800C19C63 /*  TelnyxSdk.swift */; };
+		F4FF95D7245B92E800C19C63 /* TelnyxSdk.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF95D6245B92E800C19C63 /* TelnyxSdk.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,8 +24,12 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libTelnyxSdk.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libTelnyxSdk.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		B3E7B5891CC2AC0600A0062D /* TelnyxSdk.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TelnyxSdk.m; sourceTree = "<group>"; };
-		F4FF95D5245B92E700C19C63 /* TelnyxSdk-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TelnyxSdk-Bridging-Header.h"; sourceTree = "<group>"; };
+		2E7E8D522A17F64F00F72AFB /* CallKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitService.swift; sourceTree = "<group>"; };
+		2E7E8D532A17F66100F72AFB /* CredentialsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsManager.swift; sourceTree = "<group>"; };
+		2E7E8D542A17F66A00F72AFB /* EventsHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsHandler.swift; sourceTree = "<group>"; };
+		2E7E8D552A17F68500F72AFB /* TelnyxSdkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelnyxSdkManager.swift; sourceTree = "<group>"; };
+		B3E7B5891CC2AC0600A0062D /* TelnyxSdkManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TelnyxSdkManager.m; sourceTree = "<group>"; };
+		F4FF95D5245B92E700C19C63 /* TelnyxSdkManager-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TelnyxSdkManager-Bridging-Header.h"; sourceTree = "<group>"; };
 		F4FF95D6245B92E800C19C63 /* TelnyxSdk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelnyxSdk.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -53,8 +56,12 @@
 			isa = PBXGroup;
 			children = (
 				F4FF95D6245B92E800C19C63 /* TelnyxSdk.swift */,
-				B3E7B5891CC2AC0600A0062D /* TelnyxSdk.m */,
-				F4FF95D5245B92E700C19C63 /* TelnyxSdk-Bridging-Header.h */,
+				2E7E8D522A17F64F00F72AFB /* CallKitService.swift */,
+				2E7E8D532A17F66100F72AFB /* CredentialsManager.swift */,
+				2E7E8D542A17F66A00F72AFB /* EventsHandler.swift */,
+				2E7E8D552A17F68500F72AFB /* TelnyxSdkManager.swift */,
+				B3E7B5891CC2AC0600A0062D /* TelnyxSdkManager.m */,
+				F4FF95D5245B92E700C19C63 /* TelnyxSdkManager-Bridging-Header.h */,
 				134814211AA4EA7D00B7C361 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -117,7 +124,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				F4FF95D7245B92E800C19C63 /* TelnyxSdk.swift in Sources */,
-				B3E7B58A1CC2AC0600A0062D /* TelnyxSdk.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
