@@ -1,6 +1,5 @@
 import TelnyxRTC
 import React
-import CallKit
 
 
 final class TelnyxSdk: NSObject {
@@ -9,7 +8,6 @@ final class TelnyxSdk: NSObject {
     weak var delegate: TelnyxEventHandling?
 
     private let telnyxClient: TxClient = TxClient()
-    private let callKitService = CallKitService()
     private let credentialsManager = CredentialsManager()
 
     private var outgoingCall: Call?
@@ -64,7 +62,6 @@ final class TelnyxSdk: NSObject {
                                                     destinationNumber: destinationNumber,
                                                     callId: uuid)
             telnyxClient.isAudioDeviceEnabled = true
-            callKitService.startAudioDevice(handle: "", phone: destinationNumber, callUUID: uuid)
         } catch let err {
             print(err)
         }
@@ -162,8 +159,6 @@ extension TelnyxSdk: TxClientDelegate {
         if incomingCall != nil {
             delegate?.onIncomingCallHangup(["callId": callId.uuidString])
         }
-
-        callKitService.stopAudioDevice(callUUID: callId)
     }
 
     /// You can update your UI from here based on the call states.
@@ -196,7 +191,6 @@ extension TelnyxSdk: TxClientDelegate {
           if incomingCall != nil {
               delegate?.onIncomingCallHangup(["callId": callId.uuidString])
           }
-          callKitService.stopAudioDevice(callUUID: callId)
           break
 
       case .HELD:

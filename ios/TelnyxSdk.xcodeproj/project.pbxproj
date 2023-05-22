@@ -24,7 +24,6 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libTelnyxSdk.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libTelnyxSdk.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		2E7E8D522A17F64F00F72AFB /* CallKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitService.swift; sourceTree = "<group>"; };
 		2E7E8D532A17F66100F72AFB /* CredentialsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsManager.swift; sourceTree = "<group>"; };
 		2E7E8D542A17F66A00F72AFB /* EventsHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsHandler.swift; sourceTree = "<group>"; };
 		2E7E8D552A17F68500F72AFB /* TelnyxSdkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelnyxSdkManager.swift; sourceTree = "<group>"; };
@@ -56,7 +55,6 @@
 			isa = PBXGroup;
 			children = (
 				F4FF95D6245B92E800C19C63 /* TelnyxSdk.swift */,
-				2E7E8D522A17F64F00F72AFB /* CallKitService.swift */,
 				2E7E8D532A17F66100F72AFB /* CredentialsManager.swift */,
 				2E7E8D542A17F66A00F72AFB /* EventsHandler.swift */,
 				2E7E8D552A17F68500F72AFB /* TelnyxSdkManager.swift */,
