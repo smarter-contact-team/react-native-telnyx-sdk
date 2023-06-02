@@ -88,6 +88,10 @@ export class TelnyxClient {
     return this._isLoggedIn;
   }
 
+  setAudioDevice(device: number) {
+    TelnyxNativeSdk.setAudioDevice(device);
+  }
+
   onLogin(handler: Handler<PlivoLoginEvent>) {
     return createListener('onLoginFailed', (event: PlivoLoginEvent) => {
       this._isLoggedIn = true;
@@ -142,5 +146,9 @@ export class TelnyxClient {
 
   onOutgoingCallInvalid(handler: Handler<PlivoOutgoingEvent>) {
     return createListener('onOutgoingCallInvalid', handler);
+  }
+  
+  onHeadphonesStateChanged(handler: Handler<{connected: boolean}>) {
+    return createListener('headphonesStateChanged', handler);
   }
 }
