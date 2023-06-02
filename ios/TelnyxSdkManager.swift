@@ -13,6 +13,7 @@ import React
 @objc(TelnyxSdkManager)
 final class TelnyxSdkManager: RCTEventEmitter {
     private let shared = TelnyxSdk.shared
+    private let audioDeviceManager = AudioDeviceManager()
 
     private lazy var eventsHandler: EventsHandler = {
         let eventsHandler = EventsHandler(eventEmitter: self)
@@ -20,6 +21,12 @@ final class TelnyxSdkManager: RCTEventEmitter {
 
         return eventsHandler
     }()
+
+    override init() {
+        super.init()
+
+        audioDeviceManager.delegate = self
+    }
 
     override func supportedEvents() -> [String] {
         return eventsHandler.supportedEvents
@@ -69,5 +76,15 @@ final class TelnyxSdkManager: RCTEventEmitter {
 
     @objc func reject() {
         shared.reject()
+    }
+
+    @objc func setAudioDevice(_ device: Int) {
+        audioDeviceManager.setAudioDevice(type: device)
+    }
+}
+
+extension TelnyxSdkManager: AudioDeviceManagerDelegate {
+    func didChangeHeadphonesState(connected: Bool) {
+        sendEvent(withName: "Telnyx-headphonesStateChanged", body: ["connected": connected])
     }
 }
