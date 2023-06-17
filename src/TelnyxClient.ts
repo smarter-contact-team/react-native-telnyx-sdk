@@ -8,7 +8,7 @@ enum CallState {
   TERMINATED = 3,
 }
 
-interface PlivoLoginEvent { }
+interface PlivoLoginEvent {}
 
 interface PlivoOutgoingEvent {
   callId: string;
@@ -34,13 +34,8 @@ const createListener = <T>(event: string, handler: Handler<T>) => {
 export class TelnyxClient {
   private _isLoggedIn = false;
 
-  login(
-    username: string,
-    password: string,
-    fcmToken: string,
-    certificateId: string
-  ) {
-    return TelnyxNativeSdk.login(username, password, fcmToken, certificateId);
+  login(username: string, password: string, token: string) {
+    return TelnyxNativeSdk.login(username, password, token);
   }
 
   call(phoneNumber: string, headers: Record<string, string>) {
@@ -147,8 +142,8 @@ export class TelnyxClient {
   onOutgoingCallInvalid(handler: Handler<PlivoOutgoingEvent>) {
     return createListener('onOutgoingCallInvalid', handler);
   }
-  
-  onHeadphonesStateChanged(handler: Handler<{connected: boolean}>) {
+
+  onHeadphonesStateChanged(handler: Handler<{ connected: boolean }>) {
     return createListener('headphonesStateChanged', handler);
   }
 }

@@ -21,7 +21,7 @@ interface PlivoIncomingEvent {
 type Handler<T> = (data: T) => void;
 export declare class TelnyxClient {
     private _isLoggedIn;
-    login(username: string, password: string, fcmToken: string, certificateId: string): any;
+    login(username: string, password: string, token: string): any;
     call(phoneNumber: string, headers: Record<string, string>): any;
     logout(): void;
     configureAudioSession(): void;
