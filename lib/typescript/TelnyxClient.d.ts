@@ -33,6 +33,7 @@ export declare class TelnyxClient {
     hangup(): void;
     reject(): void;
     isLoggedIn(): boolean;
+    setAudioDevice(device: number): void;
     onLogin(handler: Handler<PlivoLoginEvent>): () => void;
     onLoginFailed(handler: Handler<PlivoLoginEvent>): () => void;
     onIncomingCall(handler: Handler<PlivoIncomingEvent>): () => void;
@@ -46,6 +47,9 @@ export declare class TelnyxClient {
     onOutgoingCallRejected(handler: Handler<PlivoOutgoingEvent>): () => void;
     onOutgoingCallHangup(handler: Handler<PlivoOutgoingEvent>): () => void;
     onOutgoingCallInvalid(handler: Handler<PlivoOutgoingEvent>): () => void;
+    onHeadphonesStateChanged(handler: Handler<{
+        connected: boolean;
+    }>): () => void;
 }
 export {};
 //# sourceMappingURL=TelnyxClient.d.ts.map
