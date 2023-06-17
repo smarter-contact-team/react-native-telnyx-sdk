@@ -199,10 +199,13 @@ extension TelnyxSdk: TxClientDelegate {
       }
     }
 
-    private func convertCallInfoToDict(_ call: Call) -> [String: Any] {
-        let body: [String: Any] = [
-            "callId": call.callInfo?.callId ?? "",
-            "from": call.callInfo?.callerName ?? ""
+    private func convertCallInfoToDict(_ call: Call) -> [String: String?] {
+        let data: [String] = call.callInfo?.callerName?.components(separatedBy: "~~") ?? [];
+        let body: [String: String?] = [
+            "callId": call.callInfo?.callId.uuidString ?? "",
+            "callerName": data[0],
+            "callerPhone": call.callInfo?.callerNumber ?? "",
+            "callerId" : data[1]
         ]
 
         return body
