@@ -32,12 +32,11 @@ final class TelnyxSdkManager: RCTEventEmitter {
         return eventsHandler.supportedEvents
     }
 
-    @objc(login:password:token:certificateId:)
+    @objc(login:password:token:)
     func login(
         withUserName userName: String,
         andPassword password: String,
-        deviceToken token: String,
-        certificateId: String
+        deviceToken token: String
         )
         -> Void {
             TelnyxSdk.shared.login(username: userName,

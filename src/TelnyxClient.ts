@@ -8,16 +8,16 @@ enum CallState {
   TERMINATED = 3,
 }
 
-interface PlivoLoginEvent {}
+interface TelnyxLoginEvent {}
 
-interface PlivoOutgoingEvent {
+interface TelnyxOutgoingEvent {
   callId: string;
   state: CallState;
   isOnHold: boolean;
   muted: boolean;
 }
 
-interface PlivoIncomingEvent {
+interface TelnyxIncomingEvent {
   callId: string;
   state: CallState;
   isOnHold: boolean;
@@ -87,59 +87,59 @@ export class TelnyxClient {
     TelnyxNativeSdk.setAudioDevice(device);
   }
 
-  onLogin(handler: Handler<PlivoLoginEvent>) {
-    return createListener('onLoginFailed', (event: PlivoLoginEvent) => {
+  onLogin(handler: Handler<TelnyxLoginEvent>) {
+    return createListener('onLogin', (event: TelnyxLoginEvent) => {
       this._isLoggedIn = true;
 
       handler(event);
     });
   }
 
-  onLoginFailed(handler: Handler<PlivoLoginEvent>) {
+  onLoginFailed(handler: Handler<TelnyxLoginEvent>) {
     return createListener('onLoginFailed', handler);
   }
 
-  onIncomingCall(handler: Handler<PlivoIncomingEvent>) {
+  onIncomingCall(handler: Handler<TelnyxIncomingEvent>) {
     return createListener('onIncomingCall', handler);
   }
 
-  onIncomingCallHangup(handler: Handler<PlivoIncomingEvent>) {
+  onIncomingCallHangup(handler: Handler<TelnyxIncomingEvent>) {
     return createListener('onIncomingCallHangup', handler);
   }
 
-  onIncomingCallRejected(handler: Handler<PlivoIncomingEvent>) {
+  onIncomingCallRejected(handler: Handler<TelnyxIncomingEvent>) {
     return createListener('onIncomingCallRejected', handler);
   }
 
-  onIncomingCallInvalid(handler: Handler<PlivoIncomingEvent>) {
+  onIncomingCallInvalid(handler: Handler<TelnyxIncomingEvent>) {
     return createListener('onIncomingCallInvalid', handler);
   }
 
-  onIncomingCallAnswered(handler: Handler<PlivoIncomingEvent>) {
+  onIncomingCallAnswered(handler: Handler<TelnyxIncomingEvent>) {
     return createListener('onIncomingCallAnswered', handler);
   }
 
-  onOutgoingCall(handler: Handler<PlivoOutgoingEvent>) {
+  onOutgoingCall(handler: Handler<TelnyxOutgoingEvent>) {
     return createListener('onOutgoingCall', handler);
   }
 
-  onOutgoingCallRinging(handler: Handler<PlivoOutgoingEvent>) {
+  onOutgoingCallRinging(handler: Handler<TelnyxOutgoingEvent>) {
     return createListener('onOutgoingCallRinging', handler);
   }
 
-  onOutgoingCallAnswered(handler: Handler<PlivoOutgoingEvent>) {
+  onOutgoingCallAnswered(handler: Handler<TelnyxOutgoingEvent>) {
     return createListener('onOutgoingCallAnswered', handler);
   }
 
-  onOutgoingCallRejected(handler: Handler<PlivoOutgoingEvent>) {
+  onOutgoingCallRejected(handler: Handler<TelnyxOutgoingEvent>) {
     return createListener('onOutgoingCallRejected', handler);
   }
 
-  onOutgoingCallHangup(handler: Handler<PlivoOutgoingEvent>) {
+  onOutgoingCallHangup(handler: Handler<TelnyxOutgoingEvent>) {
     return createListener('onOutgoingCallHangup', handler);
   }
 
-  onOutgoingCallInvalid(handler: Handler<PlivoOutgoingEvent>) {
+  onOutgoingCallInvalid(handler: Handler<TelnyxOutgoingEvent>) {
     return createListener('onOutgoingCallInvalid', handler);
   }
 

@@ -4,15 +4,15 @@ declare enum CallState {
     ONGOING = 2,
     TERMINATED = 3
 }
-interface PlivoLoginEvent {
+interface TelnyxLoginEvent {
 }
-interface PlivoOutgoingEvent {
+interface TelnyxOutgoingEvent {
     callId: string;
     state: CallState;
     isOnHold: boolean;
     muted: boolean;
 }
-interface PlivoIncomingEvent {
+interface TelnyxIncomingEvent {
     callId: string;
     state: CallState;
     isOnHold: boolean;
@@ -34,19 +34,19 @@ export declare class TelnyxClient {
     reject(): void;
     isLoggedIn(): boolean;
     setAudioDevice(device: number): void;
-    onLogin(handler: Handler<PlivoLoginEvent>): () => void;
-    onLoginFailed(handler: Handler<PlivoLoginEvent>): () => void;
-    onIncomingCall(handler: Handler<PlivoIncomingEvent>): () => void;
-    onIncomingCallHangup(handler: Handler<PlivoIncomingEvent>): () => void;
-    onIncomingCallRejected(handler: Handler<PlivoIncomingEvent>): () => void;
-    onIncomingCallInvalid(handler: Handler<PlivoIncomingEvent>): () => void;
-    onIncomingCallAnswered(handler: Handler<PlivoIncomingEvent>): () => void;
-    onOutgoingCall(handler: Handler<PlivoOutgoingEvent>): () => void;
-    onOutgoingCallRinging(handler: Handler<PlivoOutgoingEvent>): () => void;
-    onOutgoingCallAnswered(handler: Handler<PlivoOutgoingEvent>): () => void;
-    onOutgoingCallRejected(handler: Handler<PlivoOutgoingEvent>): () => void;
-    onOutgoingCallHangup(handler: Handler<PlivoOutgoingEvent>): () => void;
-    onOutgoingCallInvalid(handler: Handler<PlivoOutgoingEvent>): () => void;
+    onLogin(handler: Handler<TelnyxLoginEvent>): () => void;
+    onLoginFailed(handler: Handler<TelnyxLoginEvent>): () => void;
+    onIncomingCall(handler: Handler<TelnyxIncomingEvent>): () => void;
+    onIncomingCallHangup(handler: Handler<TelnyxIncomingEvent>): () => void;
+    onIncomingCallRejected(handler: Handler<TelnyxIncomingEvent>): () => void;
+    onIncomingCallInvalid(handler: Handler<TelnyxIncomingEvent>): () => void;
+    onIncomingCallAnswered(handler: Handler<TelnyxIncomingEvent>): () => void;
+    onOutgoingCall(handler: Handler<TelnyxOutgoingEvent>): () => void;
+    onOutgoingCallRinging(handler: Handler<TelnyxOutgoingEvent>): () => void;
+    onOutgoingCallAnswered(handler: Handler<TelnyxOutgoingEvent>): () => void;
+    onOutgoingCallRejected(handler: Handler<TelnyxOutgoingEvent>): () => void;
+    onOutgoingCallHangup(handler: Handler<TelnyxOutgoingEvent>): () => void;
+    onOutgoingCallInvalid(handler: Handler<TelnyxOutgoingEvent>): () => void;
     onHeadphonesStateChanged(handler: Handler<{
         connected: boolean;
     }>): () => void;
