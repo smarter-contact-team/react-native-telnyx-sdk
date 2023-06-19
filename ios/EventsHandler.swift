@@ -45,7 +45,8 @@ final class EventsHandler: TelnyxEventHandling {
         "Telnyx-onOutgoingCallRinging",
         "Telnyx-onOutgoingCallRejected",
         "Telnyx-onOutgoingCallHangup",
-        "Telnyx-onOutgoingCallInvalid"
+        "Telnyx-onOutgoingCallInvalid",
+        "Telnyx-headphonesStateChanged"
     ]
 
     init(eventEmitter: RCTEventEmitter) {
