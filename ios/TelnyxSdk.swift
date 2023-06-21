@@ -36,6 +36,7 @@ final class TelnyxSdk: NSObject {
     }
 
     func processVoIPNotification() {
+        print("(telnyx): processVoIPNotification")
         guard let username = credentialsManager.username,
               let password = credentialsManager.password,
               let deviceToken = credentialsManager.deviceToken else {
@@ -48,25 +49,24 @@ final class TelnyxSdk: NSObject {
                                 pushDeviceToken: deviceToken)
 
         do {
-            try telnyxClient.processVoIPNotification(txConfig: txConfig, serverConfiguration: TxServerConfiguration(environment: .production))
+            try telnyxClient.processVoIPNotification(txConfig: txConfig)
         } catch let error {
             print("(telnyx): processVoIPNotification Error \(error)")
         }
     }
 
     func call(dest: String, headers: [AnyHashable: Any]) {
+        let callerName = String(describing: headers["X-PH-callerName"]!)
         let callerNumber = String(describing: headers["X-PH-callerId"]!).replacingOccurrences(of: "+", with: "")
         let destinationNumber = dest.replacingOccurrences(of: "+", with: "")
 
-        let uuid = UUID.init()
         do {
-            outgoingCall = try telnyxClient.newCall(callerName: "",
+            outgoingCall = try telnyxClient.newCall(callerName: callerName,
                                                     callerNumber: callerNumber,
                                                     destinationNumber: destinationNumber,
-                                                    callId: uuid)
-            telnyxClient.isAudioDeviceEnabled = true
-        } catch let err {
-            print(err)
+                                                    callId: UUID.init())
+        } catch let error {
+            print("(telnyx): call error", error)
         }
     }
 
@@ -108,7 +108,7 @@ final class TelnyxSdk: NSObject {
 
         if (incomingCall != nil) {
             incomingCall?.hangup()
-            outgoingCall = nil
+            incomingCall = nil
         }
     }
 
@@ -153,7 +153,8 @@ extension TelnyxSdk: TxClientDelegate {
     func onIncomingCall(call: Call)  {
         incomingCall = call
         print("(telnyx): INCOMING CALL")
-        delegate?.onIncomingCall(convertCallInfoToDict(call))
+
+        delegate?.onIncomingCall(convertCallInfoToDict(call, shouldDisplayCallUI: true))
     }
 
     /// If you have configured Push Notifications and app is in background or the Telnyx Client is disconnected this delegate method will be called after the push notification is received.
@@ -221,13 +222,14 @@ extension TelnyxSdk: TxClientDelegate {
       }
     }
 
-    private func convertCallInfoToDict(_ call: Call) -> [String: String?] {
+    private func convertCallInfoToDict(_ call: Call, shouldDisplayCallUI: Bool = false) -> [String: Any] {
         let data: [String] = call.callInfo?.callerName?.components(separatedBy: "~~") ?? [];
-        let body: [String: String?] = [
+        let body: [String: Any] = [
             "callId": call.callInfo?.callId.uuidString ?? "",
             "callerName": data[0],
             "callerPhone": call.callInfo?.callerNumber ?? "",
-            "callerId" : data[1]
+            "callerId" : data[1],
+            "shouldDisplayCallUI": shouldDisplayCallUI
         ]
 
         return body
