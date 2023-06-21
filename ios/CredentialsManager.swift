@@ -15,23 +15,23 @@ struct CredentialsManager {
     }
 
     var username: String? {
-        readItemFromKeychain(service: Constants.usernameKey)
+        retrieveItemFromKeychain(service: Constants.usernameKey)
     }
 
     var password: String? {
-        readItemFromKeychain(service: Constants.passwordKey)
+        retrieveItemFromKeychain(service: Constants.passwordKey)
     }
 
     var deviceToken: String? {
-        readItemFromKeychain(service: Constants.deviceTokenKey)
+        retrieveItemFromKeychain(service: Constants.deviceTokenKey)
     }
 
     func saveCredentials(_ username: String,
                          _ password: String,
                          _ deviceToken: String) {
-        addItemToKeychain(service: Constants.usernameKey, value: username)
-        addItemToKeychain(service: Constants.passwordKey, value: password)
-        addItemToKeychain(service: Constants.deviceTokenKey, value: deviceToken)
+        addOrUpdateItemInKeychain(service: Constants.usernameKey, value: username)
+        addOrUpdateItemInKeychain(service: Constants.passwordKey, value: password)
+        addOrUpdateItemInKeychain(service: Constants.deviceTokenKey, value: deviceToken)
     }
 
     func deleteCredentials() {
@@ -41,23 +41,36 @@ struct CredentialsManager {
     }
 
     @discardableResult
-    private func addItemToKeychain(service: String, value: String) -> Bool {
+    private func addOrUpdateItemInKeychain(service: String, value: String) -> Bool {
         let account = "telnyx"
-        var keychainQuery: [String: Any] = [
+        let keychainQuery: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: account
+            kSecAttrAccount as String: account,
+            kSecValueData as String: value.data(using: .utf8)!
         ]
 
-        let dataToSave = value.data(using: .utf8)!
-        keychainQuery[kSecValueData as String] = dataToSave
-
-        let status = SecItemAdd(keychainQuery as CFDictionary, nil)
-        return status == errSecSuccess
+        var status = SecItemAdd(keychainQuery as CFDictionary, nil)
+        if status == errSecSuccess {
+            return true
+        } else if status == errSecDuplicateItem {
+            let updateQuery: [String: Any] = [
+                kSecClass as String: kSecClassGenericPassword,
+                kSecAttrService as String: service,
+                kSecAttrAccount as String: account
+            ]
+            let updateData: [String: Any] = [
+                kSecValueData as String: value.data(using: .utf8)!
+            ]
+            status = SecItemUpdate(updateQuery as CFDictionary, updateData as CFDictionary)
+            return status == errSecSuccess
+        } else {
+            return false
+        }
     }
 
     @discardableResult
-    func deleteItemFromKeychain(service: String) -> Bool {
+    private func deleteItemFromKeychain(service: String) -> Bool {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service
@@ -67,19 +80,24 @@ struct CredentialsManager {
         return status == errSecSuccess
     }
 
-    @discardableResult
-    func readItemFromKeychain(service: String) -> String? {
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: service,
-            kSecReturnData as String: kCFBooleanTrue!,
-            kSecMatchLimit as String: kSecMatchLimitOne
+    private func retrieveItemFromKeychain(service: String) -> String? {
+        let query: [CFString: Any] = [
+            kSecClass: kSecClassGenericPassword,
+            kSecAttrService: service,
+            kSecAttrAccount: "telnyx",
+            kSecReturnData: kCFBooleanTrue!,
+            kSecMatchLimit: kSecMatchLimitOne
         ]
-        var item: CFTypeRef?
-        let status = SecItemCopyMatching(query as CFDictionary, &item)
 
-        guard status == errSecSuccess else { return nil }
-        let itemData = item as! Data
-        return String(data: itemData, encoding: .utf8)
+        var dataTypeRef: AnyObject?
+        let status: OSStatus = SecItemCopyMatching(query as CFDictionary, &dataTypeRef)
+
+        if status == errSecSuccess {
+            if let retrievedData = dataTypeRef as? Data {
+                return String(data: retrievedData, encoding: .utf8)
+            }
+        }
+
+        return nil
     }
 }

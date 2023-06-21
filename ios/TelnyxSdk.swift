@@ -26,7 +26,7 @@ final class TelnyxSdk: NSObject {
             try telnyxClient.connect(txConfig: txConfig)
             credentialsManager.saveCredentials(username, password, deviceToken)
         } catch let error {
-            print("Telnyx connect error: \(error)")
+            print("(telnyx): connect error: \(error)")
         }
     }
 
@@ -35,19 +35,22 @@ final class TelnyxSdk: NSObject {
         credentialsManager.deleteCredentials()
     }
 
-    func processVoIPNotification(callUUID: UUID) {
+    func processVoIPNotification() {
         guard let username = credentialsManager.username,
-              let password = credentialsManager.password else {
+              let password = credentialsManager.password,
+              let deviceToken = credentialsManager.deviceToken else {
             return
+
         }
 
         let txConfig = TxConfig(sipUser: username,
-                                password: password)
+                                password: password,
+                                pushDeviceToken: deviceToken)
 
         do {
-            try telnyxClient.processVoIPNotification(txConfig: txConfig)
+            try telnyxClient.processVoIPNotification(txConfig: txConfig, serverConfiguration: TxServerConfiguration(environment: .production))
         } catch let error {
-            print("ViewController:: processVoIPNotification Error \(error)")
+            print("(telnyx): processVoIPNotification Error \(error)")
         }
     }
 
@@ -120,33 +123,43 @@ final class TelnyxSdk: NSObject {
 
 extension TelnyxSdk: TxClientDelegate {
     /// When the client has successfully connected to the Telnyx Backend.
-    func onSocketConnected() {}
+    func onSocketConnected() {
+        print("(telnyx): onSocketConnected")
+    }
 
     /// This function will be executed when a sessionId is received.
-    func onSessionUpdated(sessionId: String)  {}
+    func onSessionUpdated(sessionId: String)  {
+        print("(telnyx): onSessionUpdated")
+    }
 
-    /// When the client from the Telnyx backend.
-    func onSocketDisconnected() {}
+    /// When the client disconnected from the Telnyx backend.
+    func onSocketDisconnected() {
+        print("(telnyx): onSocketDisconnected")
+    }
 
     /// You can start receiving incoming calls or start making calls once the client was fully initialized.
     func onClientReady()  {
         delegate?.onLogin()
+        print("(telnyx): onClientReady")
     }
 
     /// Something went wrong.
     func onClientError(error: Error)  {
         delegate?.onLoginFailedWithError(error)
+        print("(telnyx): onClientError", error.localizedDescription, error)
     }
 
     /// This delegate method will be called when the app is in foreground and the Telnyx Client is connected.
     func onIncomingCall(call: Call)  {
         incomingCall = call
+        print("(telnyx): INCOMING CALL")
         delegate?.onIncomingCall(convertCallInfoToDict(call))
     }
 
     /// If you have configured Push Notifications and app is in background or the Telnyx Client is disconnected this delegate method will be called after the push notification is received.
     func onPushCall(call: Call) {
        incomingCall = call
+        print("(telnyx): PUSH CALL")
         delegate?.onIncomingCall(convertCallInfoToDict(call))
     }
 
@@ -159,6 +172,7 @@ extension TelnyxSdk: TxClientDelegate {
         if incomingCall != nil {
             delegate?.onIncomingCallHangup(["callId": callId.uuidString])
         }
+        print("(telnyx): onRemoteCallEnded")
     }
 
     /// You can update your UI from here based on the call states.
@@ -181,10 +195,18 @@ extension TelnyxSdk: TxClientDelegate {
 
       case .ACTIVE:
           print("(telnyx): active")
+          telnyxClient.isAudioDeviceEnabled = true
+          if outgoingCall != nil {
+              delegate?.onOutgoingCallAnswered(["callId": callId.uuidString])
+          }
+          if incomingCall != nil {
+              delegate?.onIncomingCallAnswered(["callId": callId.uuidString])
+          }
           break
 
       case .DONE:
           print("(telnyx): done")
+          telnyxClient.isAudioDeviceEnabled = false
           if outgoingCall != nil {
               delegate?.onOutgoingCallHangup(["callId": callId.uuidString])
           }
