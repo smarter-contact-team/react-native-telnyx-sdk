@@ -30,7 +30,7 @@ final class TelnyxSdk: NSObject {
         }
     }
 
-    func refreshLogin() {
+    func reconnect() {
         guard let username = credentialsManager.username,
               let password = credentialsManager.password,
               let deviceToken = credentialsManager.deviceToken else {
