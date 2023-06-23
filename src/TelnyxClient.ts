@@ -38,6 +38,10 @@ export class TelnyxClient {
     return TelnyxNativeSdk.login(username, password, token);
   }
 
+  reconnect() {
+    TelnyxNativeSdk.reconnect();
+  }
+
   call(phoneNumber: string, headers: Record<string, string>) {
     return TelnyxNativeSdk.call(phoneNumber, headers);
   }

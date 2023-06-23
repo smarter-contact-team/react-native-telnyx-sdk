@@ -44,6 +44,10 @@ final class TelnyxSdkManager: RCTEventEmitter {
                                    deviceToken: token)
     }
 
+    @objc func reconnect() {
+        shared.reconnect()
+    }
+    
     @objc func logout() {
         shared.logout()
     }

@@ -30,6 +30,24 @@ final class TelnyxSdk: NSObject {
         }
     }
 
+    func reconnect() {
+        guard let username = credentialsManager.username,
+              let password = credentialsManager.password,
+              let deviceToken = credentialsManager.deviceToken else {
+            return
+        }
+
+        let txConfig = TxConfig(sipUser: username,
+                                password: password,
+                                pushDeviceToken: deviceToken)
+
+        do {
+            try telnyxClient.connect(txConfig: txConfig)
+        } catch let error {
+            print("(telnyx): connect error: \(error)")
+        }
+    }
+    
     func logout() {
         telnyxClient.disconnect()
         credentialsManager.deleteCredentials()
