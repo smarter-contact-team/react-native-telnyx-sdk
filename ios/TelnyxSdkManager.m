@@ -7,6 +7,7 @@ RCT_EXTERN_METHOD(login:(nonnull NSString *)userName
                   password:(nonnull NSString *)password
                   token:(nonnull NSString *)token
                   )
+RCT_EXTERN_METHOD(refreshLogin)
 RCT_EXTERN_METHOD(logout)
 
 RCT_EXTERN_METHOD(call:(nonnull NSString *)dest
