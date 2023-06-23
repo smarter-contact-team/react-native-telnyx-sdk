@@ -22,6 +22,7 @@ type Handler<T> = (data: T) => void;
 export declare class TelnyxClient {
     private _isLoggedIn;
     login(username: string, password: string, token: string): any;
+    reconnect(): void;
     call(phoneNumber: string, headers: Record<string, string>): any;
     logout(): void;
     configureAudioSession(): void;
