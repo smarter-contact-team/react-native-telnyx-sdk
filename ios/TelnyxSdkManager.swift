@@ -9,27 +9,80 @@ import Foundation
 import TelnyxRTC
 import React
 
+protocol TelnyxEventHandling: AnyObject {
+    // Login
+    func onLogin()
+    func onLoginFailed()
+    func onLogout()
+    func onLoginFailedWithError(_ error: Error!)
+    // Outgoing call
+    func onCalling(_ data: [String: Any])
+    func onOutgoingCallRejected(_ data: [String: Any])
+    func onOutgoingCallInvalid(_ data: [String: Any])
+    func onOutgoingCallRinging(_ data: [String: Any])
+    func onOutgoingCallHangup(_ data: [String: Any])
+    func onOutgoingCallAnswered(_ data: [String: Any])
+    // Incoming call
+    func onIncomingCall(_ data: [String: Any])
+    func onIncomingCallHangup(_ data: [String: Any])
+    func onIncomingCallAnswered(_ data: [String: Any])
+    func onIncomingCallInvalid(_ data: [String: Any])
+    func onIncomingCallRejected(_ data: [String: Any])
+}
 
 @objc(TelnyxSdkManager)
-final class TelnyxSdkManager: RCTEventEmitter {
+final class TelnyxSdkManager: RCTEventEmitter, TelnyxEventHandling {
     private let shared = TelnyxSdk.shared
     private let audioDeviceManager = AudioDeviceManager()
 
-    private lazy var eventsHandler: EventsHandler = {
-        let eventsHandler = EventsHandler(eventEmitter: self)
-        TelnyxSdk.shared.delegate = eventsHandler
-
-        return eventsHandler
-    }()
+    private var hasListeners : Bool = false
 
     override init() {
         super.init()
 
+        TelnyxSdk.shared.delegate = self
         audioDeviceManager.delegate = self
     }
 
+    override static func requiresMainQueueSetup() -> Bool {
+        return true
+    }
+
     override func supportedEvents() -> [String] {
-        return eventsHandler.supportedEvents
+        return [
+            "Telnyx-onLogin",
+            "Telnyx-onLoginFailed",
+            "Telnyx-onLogout",
+            "Telnyx-onIncomingCall",
+            "Telnyx-onIncomingCallHangup",
+            "Telnyx-onIncomingCallRejected",
+            "Telnyx-onIncomingCallAnswered",
+            "Telnyx-onIncomingCallInvalid",
+            "Telnyx-onOutgoingCall",
+            "Telnyx-onOutgoingCallAnswered",
+            "Telnyx-onOutgoingCallRinging",
+            "Telnyx-onOutgoingCallRejected",
+            "Telnyx-onOutgoingCallHangup",
+            "Telnyx-onOutgoingCallInvalid",
+            "Telnyx-headphonesStateChanged"
+        ]
+    }
+
+    override func startObserving() {
+        print("TelnyxSdk ReactNativeEventEmitter startObserving")
+
+        hasListeners = true
+
+        super.startObserving()
+    }
+
+
+    override func stopObserving() {
+        print("TelnyxSdk ReactNativeEventEmitter stopObserving")
+
+        hasListeners = false
+
+        super.stopObserving()
     }
 
     @objc(login:password:token:)
@@ -47,7 +100,7 @@ final class TelnyxSdkManager: RCTEventEmitter {
     @objc func reconnect() {
         shared.reconnect()
     }
-    
+
     @objc func logout() {
         shared.logout()
     }
@@ -83,6 +136,67 @@ final class TelnyxSdkManager: RCTEventEmitter {
 
     @objc func setAudioDevice(_ device: Int) {
         audioDeviceManager.setAudioDevice(type: device)
+    }
+
+    func onLogin() {
+        sendEvent(withName: "Telnyx-onLogin", body:nil);
+    }
+
+    func onLoginFailed() {
+        sendEvent(withName: "Telnyx-onLoginFailed", body:nil);
+    }
+
+    func onLogout() {
+        sendEvent(withName: "Telnyx-onLogout", body:nil);
+    }
+
+    func onLoginFailedWithError(_ error: Error!) {
+        let body = ["error": error.localizedDescription]
+        sendEvent(withName: "Telnyx-onLoginFailed", body: body);
+    }
+
+    func onCalling(_ data: [String: Any]) {
+        sendEvent(withName: "Telnyx-onOutgoingCall", body: data);
+    }
+
+    func onOutgoingCallRejected(_ data: [String: Any]) {
+        sendEvent(withName: "Telnyx-onOutgoingCallRejected", body: data);
+    }
+
+    func onOutgoingCallInvalid(_ data: [String: Any]) {
+        sendEvent(withName: "Telnyx-onOutgoingCallInvalid", body: data);
+    }
+
+    func onOutgoingCallRinging(_ data: [String: Any]) {
+        sendEvent(withName: "Telnyx-onOutgoingCallRinging", body: data);
+    }
+
+    func onOutgoingCallHangup(_ data: [String: Any]) {
+        sendEvent(withName: "Telnyx-onOutgoingCallHangup", body: data);
+    }
+
+    func onOutgoingCallAnswered(_ data: [String: Any]) {
+        sendEvent(withName: "Telnyx-onOutgoingCallAnswered", body: data);
+    }
+
+    func onIncomingCall(_ data: [String: Any]) {
+        sendEvent(withName: "Telnyx-onIncomingCall", body: data);
+    }
+
+    func onIncomingCallHangup(_ data: [String: Any]) {
+        sendEvent(withName: "Telnyx-onIncomingCallHangup", body: data);
+    }
+
+    func onIncomingCallAnswered(_ data: [String: Any]) {
+        sendEvent(withName: "Telnyx-onIncomingCallAnswered", body: data);
+    }
+
+    func onIncomingCallInvalid(_ data: [String: Any]) {
+        sendEvent(withName: "Telnyx-onIncomingCallInvalid", body: data);
+    }
+
+    func onIncomingCallRejected(_ data: [String: Any]) {
+        sendEvent(withName: "Telnyx-onIncomingCallRejected", body: data);
     }
 }
 
