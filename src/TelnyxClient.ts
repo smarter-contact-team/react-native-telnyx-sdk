@@ -10,6 +10,10 @@ enum CallState {
 
 interface TelnyxLoginEvent {}
 
+interface TelnyxLoginFailedEvent {
+  error: string;
+}
+
 interface TelnyxOutgoingEvent {
   callId: string;
   state: CallState;
@@ -99,7 +103,7 @@ export class TelnyxClient {
     });
   }
 
-  onLoginFailed(handler: Handler<TelnyxLoginEvent>) {
+  onLoginFailed(handler: Handler<TelnyxLoginFailedEvent>) {
     return createListener('onLoginFailed', handler);
   }
 

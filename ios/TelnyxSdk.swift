@@ -26,6 +26,7 @@ final class TelnyxSdk: NSObject {
             try telnyxClient.connect(txConfig: txConfig)
             credentialsManager.saveCredentials(username, password, deviceToken)
         } catch let error {
+            delegate?.onLoginFailedWithError(error)
             print("(telnyx): connect error: \(error)")
         }
     }
