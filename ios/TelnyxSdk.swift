@@ -17,7 +17,7 @@ final class TelnyxSdk: NSObject {
         super.init()
 
         telnyxClient.delegate = self
-        os_log("--->>> telnyx init")
+        os_log("--->>> telnyx: init")
     }
 
     func login(username: String, password: String, deviceToken: String) -> Void {
