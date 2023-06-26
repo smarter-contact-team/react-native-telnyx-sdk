@@ -6,6 +6,9 @@ declare enum CallState {
 }
 interface TelnyxLoginEvent {
 }
+interface TelnyxLoginFailedEvent {
+    error: string;
+}
 interface TelnyxOutgoingEvent {
     callId: string;
     state: CallState;
@@ -36,7 +39,7 @@ export declare class TelnyxClient {
     isLoggedIn(): boolean;
     setAudioDevice(device: number): void;
     onLogin(handler: Handler<TelnyxLoginEvent>): () => void;
-    onLoginFailed(handler: Handler<TelnyxLoginEvent>): () => void;
+    onLoginFailed(handler: Handler<TelnyxLoginFailedEvent>): () => void;
     onIncomingCall(handler: Handler<TelnyxIncomingEvent>): () => void;
     onIncomingCallHangup(handler: Handler<TelnyxIncomingEvent>): () => void;
     onIncomingCallRejected(handler: Handler<TelnyxIncomingEvent>): () => void;

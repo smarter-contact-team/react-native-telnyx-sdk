@@ -66,7 +66,8 @@ final class EventsHandler: TelnyxEventHandling {
     }
 
     func onLoginFailedWithError(_ error: Error!) {
-        eventEmitter?.sendEvent(withName: "Telnyx-onLoginFailed", body:nil);
+        let body = ["error": error.localizedDescription]
+        eventEmitter?.sendEvent(withName: "Telnyx-onLoginFailed", body: body);
     }
 
     func onCalling(_ data: [String: Any]) {
