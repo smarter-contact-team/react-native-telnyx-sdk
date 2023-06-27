@@ -35,6 +35,7 @@ final class TelnyxSdk: NSObject {
     }
 
     func reconnect() {
+        guard incomingCall == nil && outgoingCall == nil else { return }
         os_log("--->>> telnyx reconnect")
         guard let username = credentialsManager.username,
               let password = credentialsManager.password,
