@@ -1,6 +1,6 @@
 import TelnyxRTC
 import React
-
+import CallKit
 
 final class TelnyxSdk: NSObject {
     static let shared = TelnyxSdk()
@@ -17,26 +17,22 @@ final class TelnyxSdk: NSObject {
         super.init()
 
         telnyxClient.delegate = self
-        os_log("--->>> telnyx: init")
     }
 
     func login(username: String, password: String, deviceToken: String) -> Void {
         let txConfig = TxConfig(sipUser: username, password: password, pushDeviceToken: deviceToken)
 
         do {
-            os_log("--->>> telnyx login started")
             try telnyxClient.connect(txConfig: txConfig)
             credentialsManager.saveCredentials(username, password, deviceToken)
         } catch let error {
             delegate?.onLoginFailedWithError(error)
-            os_log("--->>> telnyx login failed")
             print("(telnyx): connect error: \(error)")
         }
     }
 
     func reconnect() {
         guard incomingCall == nil && outgoingCall == nil else { return }
-        os_log("--->>> telnyx reconnect")
         guard let username = credentialsManager.username,
               let password = credentialsManager.password,
               let deviceToken = credentialsManager.deviceToken else {
@@ -55,7 +51,6 @@ final class TelnyxSdk: NSObject {
     }
 
     func logout() {
-        os_log("--->>> telnyx logout")
         telnyxClient.disconnect()
         credentialsManager.deleteCredentials()
     }
@@ -81,7 +76,6 @@ final class TelnyxSdk: NSObject {
     }
 
     func call(dest: String, headers: [AnyHashable: Any]) {
-        os_log("--->>> telnyx call")
         let callerName = String(describing: headers["X-PH-callerName"]!)
         let callerNumber = String(describing: headers["X-PH-callerId"]!).replacingOccurrences(of: "+", with: "")
         let destinationNumber = dest.replacingOccurrences(of: "+", with: "")
@@ -92,7 +86,6 @@ final class TelnyxSdk: NSObject {
                                                     destinationNumber: destinationNumber,
                                                     callId: UUID.init())
         } catch let error {
-            os_log("--->>> telnyx call error")
             print("(telnyx): call error", error)
         }
     }
@@ -151,33 +144,28 @@ final class TelnyxSdk: NSObject {
 extension TelnyxSdk: TxClientDelegate {
     /// When the client has successfully connected to the Telnyx Backend.
     func onSocketConnected() {
-        os_log("--->>> telnyx onSocketConnected")
         print("(telnyx): onSocketConnected")
     }
 
     /// This function will be executed when a sessionId is received.
     func onSessionUpdated(sessionId: String)  {
-        os_log("--->>> telnyx onSessionUpdated")
         print("(telnyx): onSessionUpdated")
     }
 
     /// When the client disconnected from the Telnyx backend.
     func onSocketDisconnected() {
-        os_log("--->>> telnyx onSocketDisconnected")
         print("(telnyx): onSocketDisconnected")
     }
 
     /// You can start receiving incoming calls or start making calls once the client was fully initialized.
     func onClientReady()  {
         delegate?.onLogin()
-        os_log("--->>> telnyx onLogin")
         print("(telnyx): onClientReady")
     }
 
     /// Something went wrong.
     func onClientError(error: Error)  {
         delegate?.onLoginFailedWithError(error)
-        os_log("--->>> telnyx onLoginFailed", error.localizedDescription)
         print("(telnyx): onClientError", error.localizedDescription, error)
     }
 
@@ -204,6 +192,9 @@ extension TelnyxSdk: TxClientDelegate {
 
         if incomingCall != nil {
             delegate?.onIncomingCallHangup(["callId": callId.uuidString])
+            dismissCallKitUI { [weak self] error in
+                self?.incomingCall = nil
+            }
         }
         print("(telnyx): onRemoteCallEnded")
     }
@@ -265,5 +256,23 @@ extension TelnyxSdk: TxClientDelegate {
         ]
 
         return body
+    }
+
+    private func dismissCallKitUI(_ completion: @escaping (Error?) -> Void) {
+        let callController = CXCallController()
+
+        guard let callId = incomingCall?.callInfo?.callId.uuidString,
+              let uuid = UUID(uuidString: callId)
+        else {
+            completion(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid UUID"]))
+            return
+        }
+
+        let endCallAction = CXEndCallAction(call: uuid)
+        let transaction = CXTransaction(action: endCallAction)
+
+        callController.request(transaction) { error in
+            completion(error)
+        }
     }
 }
