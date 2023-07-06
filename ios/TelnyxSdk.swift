@@ -84,7 +84,8 @@ final class TelnyxSdk: NSObject {
             outgoingCall = try telnyxClient.newCall(callerName: callerName,
                                                     callerNumber: callerNumber,
                                                     destinationNumber: destinationNumber,
-                                                    callId: UUID.init())
+                                                    callId: UUID.init(),
+                                                    clientState: "b3V0Z29pbmc=")
         } catch let error {
             print("(telnyx): call error", error)
         }
