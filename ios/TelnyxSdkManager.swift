@@ -156,6 +156,7 @@ final class TelnyxSdkManager: RCTEventEmitter, TelnyxEventHandling {
     }
 
     func onCalling(_ data: [String: Any]) {
+        audioDeviceManager.isBluetoothDeviceConnected()
         sendEvent(withName: "Telnyx-onOutgoingCall", body: data);
     }
 
@@ -188,6 +189,7 @@ final class TelnyxSdkManager: RCTEventEmitter, TelnyxEventHandling {
     }
 
     func onIncomingCallAnswered(_ data: [String: Any]) {
+        audioDeviceManager.isBluetoothDeviceConnected()
         sendEvent(withName: "Telnyx-onIncomingCallAnswered", body: data);
     }
 
