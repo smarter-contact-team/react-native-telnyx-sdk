@@ -251,8 +251,13 @@ extension TelnyxSdk: TxClientDelegate {
 
     private func convertCallInfoToDict(_ call: Call, shouldDisplayCallUI: Bool = false) -> [String: Any] {
         let data: [String] = call.callInfo?.callerName?.components(separatedBy: "~~") ?? [];
+
+        // Since telnyx sometimes sends different callIds in push notification and onPushCall, using callKitCallId as callId, to be able to end call.
+        // If call received in onIncomingCall method, using callId from call.
+        let callId = callKitCallId ?? call.callInfo?.callId.uuidString
+
         let body: [String: Any] = [
-            "callId": call.callInfo?.callId.uuidString ?? "",
+            "callId": callId ?? "",
             "callerName": data[0],
             "callerPhone": call.callInfo?.callerNumber ?? "",
             "callerId" : data[1],
@@ -265,9 +270,10 @@ extension TelnyxSdk: TxClientDelegate {
     private func dismissCallKitUI(_ completion: @escaping (Error?) -> Void) {
         let callController = CXCallController()
 
-        guard let callId = incomingCall?.callInfo?.callId.uuidString,
-              let callKitCallId = callKitCallId,
-              let uuid = UUID(uuidString: callId == callKitCallId  ? callId : callKitCallId)
+        let callId = callKitCallId ?? incomingCall?.callInfo?.callId.uuidString
+
+        guard let callId = callId,
+              let uuid = UUID(uuidString: callId)
         else {
             completion(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid UUID"]))
             return
