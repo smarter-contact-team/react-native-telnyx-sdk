@@ -4,6 +4,6 @@
 
 @interface TelnyxSdkManager : RCTEventEmitter <RCTBridgeModule>
 
-+ (void)processVoIPNotification;
++ (void)processVoIPNotification:(NSString *)callId;
 
 @end

@@ -105,8 +105,8 @@ final class TelnyxSdkManager: RCTEventEmitter, TelnyxEventHandling {
         shared.logout()
     }
 
-    @objc static func processVoIPNotification() {
-        TelnyxSdk.shared.processVoIPNotification()
+    @objc static func processVoIPNotification(_ callId: String) {
+        TelnyxSdk.shared.processVoIPNotification(callId: callId)
     }
 
     @objc(call:headers:)

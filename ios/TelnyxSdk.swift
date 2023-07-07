@@ -13,6 +13,8 @@ final class TelnyxSdk: NSObject {
     private var outgoingCall: Call?
     private var incomingCall: Call?
 
+    private var callKitCallId: String?
+
     override init() {
         super.init()
 
@@ -55,15 +57,15 @@ final class TelnyxSdk: NSObject {
         credentialsManager.deleteCredentials()
     }
 
-    func processVoIPNotification() {
-        print("(telnyx): processVoIPNotification")
+    func processVoIPNotification(callId: String) {
+        callKitCallId = callId.uppercased()
+
         guard let username = credentialsManager.username,
               let password = credentialsManager.password,
               let deviceToken = credentialsManager.deviceToken else {
             return
-
         }
-
+        print("(telnyx): processVoIPNotification")
         let txConfig = TxConfig(sipUser: username,
                                 password: password,
                                 pushDeviceToken: deviceToken)
@@ -180,7 +182,7 @@ extension TelnyxSdk: TxClientDelegate {
 
     /// If you have configured Push Notifications and app is in background or the Telnyx Client is disconnected this delegate method will be called after the push notification is received.
     func onPushCall(call: Call) {
-       incomingCall = call
+        incomingCall = call
         print("(telnyx): PUSH CALL")
         delegate?.onIncomingCall(convertCallInfoToDict(call))
     }
@@ -195,6 +197,7 @@ extension TelnyxSdk: TxClientDelegate {
             delegate?.onIncomingCallHangup(["callId": callId.uuidString])
             dismissCallKitUI { [weak self] error in
                 self?.incomingCall = nil
+                self?.callKitCallId = nil
             }
         }
         print("(telnyx): onRemoteCallEnded")
@@ -248,8 +251,13 @@ extension TelnyxSdk: TxClientDelegate {
 
     private func convertCallInfoToDict(_ call: Call, shouldDisplayCallUI: Bool = false) -> [String: Any] {
         let data: [String] = call.callInfo?.callerName?.components(separatedBy: "~~") ?? [];
+
+        // Since telnyx sometimes sends different callIds in push notification and onPushCall, using callKitCallId as callId, to be able to end call.
+        // If call received in onIncomingCall method, using callId from call.
+        let callId = callKitCallId ?? call.callInfo?.callId.uuidString
+
         let body: [String: Any] = [
-            "callId": call.callInfo?.callId.uuidString ?? "",
+            "callId": callId ?? "",
             "callerName": data[0],
             "callerPhone": call.callInfo?.callerNumber ?? "",
             "callerId" : data[1],
@@ -262,7 +270,9 @@ extension TelnyxSdk: TxClientDelegate {
     private func dismissCallKitUI(_ completion: @escaping (Error?) -> Void) {
         let callController = CXCallController()
 
-        guard let callId = incomingCall?.callInfo?.callId.uuidString,
+        let callId = callKitCallId ?? incomingCall?.callInfo?.callId.uuidString
+
+        guard let callId = callId,
               let uuid = UUID(uuidString: callId)
         else {
             completion(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid UUID"]))
